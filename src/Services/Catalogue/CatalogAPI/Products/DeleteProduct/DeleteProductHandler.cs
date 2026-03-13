@@ -1,6 +1,16 @@
-﻿namespace CatalogAPI.Products.DeleteProduct
+﻿
+namespace CatalogAPI.Products.DeleteProduct
 {
-    public class DeleteProductHandler
+    public record DeleteProductCommand(Guid Id):ICommand<DeleteProductResult>;
+    public record DeleteProductResult(bool isSuccess);
+    public class DeleteProductCommandHandler (IDocumentSession session, ILogger<DeleteProductCommandHandler> logger):
+        ICommandHandler<DeleteProductCommand, DeleteProductResult>
     {
+        public async Task<DeleteProductResult> Handle(DeleteProductCommand command, CancellationToken cancellationToken)
+        {
+            session.Delete<Product>(command.Id);
+            await session.SaveChangesAsync(cancellationToken);
+            return new DeleteProductResult(true);
+        }
     }
 }

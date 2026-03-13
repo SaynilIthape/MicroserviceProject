@@ -1,6 +1,8 @@
+version: '3.4'
+
 services:
-  db:
-    image: postgres:18
+  catalogdb:
+    image: postgres
     container_name: catalogdb
     environment:
       POSTGRES_USER: postgres
@@ -9,6 +11,60 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql
+      - postgres_catalog:/var/lib/postgresql
+
+  basketdb:
+    image: postgres
+    container_name: basketdb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecret
+      POSTGRES_DB: basket
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_basket:/var/lib/postgresql
+
+  distributedache:
+    container_name: distributedache
+    restart: always 
+    ports:
+      - "6379:6379"
+
+  catalogapi:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__MartenConnection=Server=catalogdb;port=5432;Database=catalog;User Id=postgres;Password=mysecret; Include Error Detail=true  
+    depends_on:
+      - catalogdb      
+    ports:
+      - "6000:8080"
+      - "6060:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+  basketapi:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__MartenConnection=Server=basketdb;port=5432;Database=basket;User Id=postgres;Password=mysecret; Include Error Detail=true  
+      - ConnectionStrings__RedisConnection=distributedache:6379 
+    depends_on:
+      - basketdb
+      - distributedache
+    ports:
+      - "6001:8080"
+      - "6061:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 volumes:
   pgdata:
+

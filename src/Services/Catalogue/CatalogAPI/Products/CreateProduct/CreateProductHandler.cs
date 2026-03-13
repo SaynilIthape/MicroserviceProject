@@ -1,4 +1,6 @@
 ﻿
+using FluentValidation;
+
 namespace CatalogAPI.Products.CreateProduct
 {
 
@@ -11,10 +13,29 @@ namespace CatalogAPI.Products.CreateProduct
         decimal Price
     ) : ICommand<CreateProductResult>;
     public record CreateProductResult(Guid Id);
-    internal class CreateProductCommandHandler(IDocumentSession session) : ICommandHandler<CreateProductCommand, CreateProductResult>
+
+    public class CreateProductValidator : AbstractValidator<CreateProductCommand>
+    {
+        public CreateProductValidator()
+        {
+            RuleFor(a=>a.Name).NotEmpty().WithMessage("Product name is required.");
+            RuleFor(a=>a.Category).NotEmpty().WithMessage("At least one category is required.");    
+            RuleFor(a=>a.ImageFile).NotEmpty().WithMessage("ImageFile is required.");
+            RuleFor(a=>a.Price).GreaterThan(0).WithMessage("Price must be greater than zero.");
+
+        }
+    }
+    internal class CreateProductCommandHandler(IDocumentSession session, IValidator<CreateProductCommand> validator) : ICommandHandler<CreateProductCommand, CreateProductResult>
     {
         public async Task<CreateProductResult> Handle(CreateProductCommand request, CancellationToken cancellationToken)
         {
+
+            //var result = await validator.ValidateAsync(request, cancellationToken);
+            // var errors = result.Errors.Select(e => e.ErrorMessage).ToList();
+            //if (errors.Any()) {
+            //    throw new ValidationException(errors.FirstOrDefault());
+            //}
+
 
             var product= new Product { 
                 Id=Guid.NewGuid(),

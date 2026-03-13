@@ -1,16 +1,64 @@
+version: '3.8'
 
 services:
-  db:
-    image: postgres:18
+
+  catalogdb:
     container_name: catalogdb
+    image: postgres:18
+    restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mysecret
-      POSTGRES_DB: catalog
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: CatalogDb
+    volumes:
+      - postgres_catalog:/var/lib/postgresql
     ports:
       - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql
-volumes:
-  pgdata:
 
+  basketdb:
+    container_name: basketdb
+    image: postgres:18
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: BasketDb
+    volumes:
+      - postgres_basket:/var/lib/postgresql
+    ports:
+      - "5433:5432"
+
+  distributedache:
+    container_name: distributedache
+    image: redis:7
+    restart: always 
+    ports:
+      - "6379:6379"
+
+  catalogapi:
+    container_name: catalogapi
+    build:
+      context: .
+      dockerfile: Services/Catalogue/CatalogAPI/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - catalogdb
+    ports:
+      - "8000:80"
+
+  basketapi:
+    container_name: basketapi
+    build:
+      context: .
+      dockerfile: Services/Basket/Basket.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - basketdb
+    ports:
+      - "8001:80"
+
+volumes:
+  postgres_catalog:
+  postgres_basket:

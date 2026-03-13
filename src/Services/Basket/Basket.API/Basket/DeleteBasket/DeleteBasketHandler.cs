@@ -1,0 +1,22 @@
+﻿using Basket.API.Data;
+using Basket.API.Models;
+using BuildingBlocks.CQRS;
+using Marten;
+
+namespace Basket.API.Basket.DeleteBasket
+{
+
+    
+        public record DeleteBasketCommand(string UserName) : ICommand<DeleteBasketResult>;
+        public record DeleteBasketResult(bool isSuccess);
+        public class DeleteBasketCommandHandler(IBasketRepository repository, ILogger<DeleteBasketCommandHandler> logger) :
+            ICommandHandler<DeleteBasketCommand, DeleteBasketResult>
+        {
+            public async Task<DeleteBasketResult> Handle(DeleteBasketCommand command, CancellationToken cancellationToken)
+            {
+               await repository.DeleteBasket(command.UserName.ToString(), cancellationToken);
+                return new DeleteBasketResult(true);
+            }
+        }
+    
+}

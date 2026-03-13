@@ -3,8 +3,8 @@ using CatalogAPI.Exceptions;
 
 namespace CatalogAPI.Products.UpdateProducts
 {
-    public record UpdateProductHandlerCommand(Guid id,string name, List<string> category,string Description,
-        string ImageFile, decimal price) : ICommand<UpdateProductResult>;
+    public record UpdateProductHandlerCommand(Guid id, string Name, List<string> Category, string Description,
+        string ImageFile, decimal Price) : ICommand<UpdateProductResult>;
     public record UpdateProductResult(bool IsSuccess);
 
     public class UpdateCommandProductHandler (IDocumentSession session): ICommandHandler<UpdateProductHandlerCommand, UpdateProductResult>
@@ -14,8 +14,9 @@ namespace CatalogAPI.Products.UpdateProducts
             var result = await session.LoadAsync<Product>(request.id,cancellationToken);
             if(result is not null)
             {
-                result.Name = request.name;
-                result.Category = request.category;
+                
+                result.Name = request.Name;
+                result.Category = request.Category;
                 result.Description = request.Description;
                 result.ImageFile = request.ImageFile;
                 result.Price = result.Price;
