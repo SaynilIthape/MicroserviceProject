@@ -2,18 +2,30 @@ version: '3.8'
 
 services:
 
+  # catalogdb:
+  #   container_name: catalogdb
+  #   image: postgres:18
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: admin
+  #     POSTGRES_PASSWORD: password
+  #     POSTGRES_DB: CatalogDb
+  #   volumes:
+  #     - postgres_catalog:/var/lib/postgresql
+  #   ports:
+  #     - "5432:5432"
+
   catalogdb:
+    image: ankane/pgvector
     container_name: catalogdb
-    image: postgres:18
-    restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: CatalogDb
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: mysecret
+        POSTGRES_DB: catalogDb
     volumes:
-      - postgres_catalog:/var/lib/postgresql
+       - postgres_catalog:/var/lib/postgresql
     ports:
-      - "5432:5432"
+        - "5432:5432"
 
   basketdb:
     container_name: basketdb
@@ -59,6 +71,16 @@ services:
     ports:
       - "8001:80"
 
+  # ollama:
+  #   image: ollama/ollama
+  #   container_name: ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   restart: always
+
 volumes:
   postgres_catalog:
   postgres_basket:
+  ollama_data:  
