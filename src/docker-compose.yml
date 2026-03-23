@@ -2,30 +2,31 @@ version: '3.8'
 
 services:
 
-  # catalogdb:
-  #   container_name: catalogdb
-  #   image: postgres:18
-  #   restart: always
-  #   environment:
-  #     POSTGRES_USER: admin
-  #     POSTGRES_PASSWORD: password
-  #     POSTGRES_DB: CatalogDb
-  #   volumes:
-  #     - postgres_catalog:/var/lib/postgresql
-  #   ports:
-  #     - "5432:5432"
-
   catalogdb:
-    image: ankane/pgvector
     container_name: catalogdb
+    image: postgres:18
+    restart: always
     environment:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: mysecret
-        POSTGRES_DB: catalogDb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: CatalogDb
     volumes:
-       - postgres_catalog:/var/lib/postgresql
+      - postgres_catalog:/var/lib/postgresql
     ports:
-        - "5432:5432"
+      - "5432:5432"
+
+  #RAG implementation with pgvector
+  # catalogdb:
+  #   image: ankane/pgvector
+  #   container_name: catalogdb
+  #   environment:
+  #       POSTGRES_USER: postgres
+  #       POSTGRES_PASSWORD: mysecret
+  #       POSTGRES_DB: catalogDb
+  #   volumes:
+  #      - postgres_catalog:/var/lib/postgresql
+  #   ports:
+  #       - "5432:5432"
 
   basketdb:
     container_name: basketdb
@@ -80,7 +81,15 @@ services:
   #     - ollama_data:/root/.ollama
   #   restart: always
 
+  discount.grpc:
+    image: ${DOCKER_REGISTRY-}discountgrpc
+    build:
+      context: .
+      dockerfile: Services/Discount/Discount.Grpc/Dockerfile
+    volumes:
+      - ./data:/app/data
 volumes:
   postgres_catalog:
   postgres_basket:
   ollama_data:  
+  discount_data:

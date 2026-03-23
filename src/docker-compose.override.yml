@@ -1,29 +1,30 @@
 version: '3.4'
 
 services:
-  # catalogdb:
-  #   image: postgres
-  #   container_name: catalogdb
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: mysecret
-  #     POSTGRES_DB: catalog
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres_catalog:/var/lib/postgresql
-  
   catalogdb:
-    image: ankane/pgvector
+    image: postgres
     container_name: catalogdb
     environment:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: mysecret
-        POSTGRES_DB: catalogDb
-    volumes:
-       - postgres_catalog:/var/lib/postgresql
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecret
+      POSTGRES_DB: catalog
     ports:
-        - "5432:5432"
+      - "5432:5432"
+    volumes:
+      - postgres_catalog:/var/lib/postgresql
+  
+  #RAG implementation with pgvector
+  # catalogdb:
+  #   image: ankane/pgvector
+  #   container_name: catalogdb
+  #   environment:
+  #       POSTGRES_USER: postgres
+  #       POSTGRES_PASSWORD: mysecret
+  #       POSTGRES_DB: catalogDb
+  #   volumes:
+  #      - postgres_catalog:/var/lib/postgresql
+  #   ports:
+  #       - "5432:5432"
 
   basketdb:
     image: postgres
@@ -73,6 +74,7 @@ services:
       - ASPNETCORE_HTTPS_PORTS=8081
       - ConnectionStrings__MartenConnection=Server=basketdb;port=5432;Database=basket;User Id=postgres;Password=mysecret; Include Error Detail=true  
       - ConnectionStrings__RedisConnection=distributedache:6379 
+      - GrpcSettings__DiscountUrl=https://discount.grpc:8081 
     depends_on:
       - basketdb
       - distributedache
@@ -84,6 +86,21 @@ services:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+  discount.grpc:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__Database=Data Source=/app/data/discountDb"
+    ports:
+      - "6002:8080"
+      - "6062:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+     
 volumes:
   pgdata:
+  discount_data:
+
 

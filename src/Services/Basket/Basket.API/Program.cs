@@ -22,6 +22,7 @@
 //app.Run();
 
 using BuildingBlocks.Exceptions.Handler;
+using Discount.Grpc;
 using FluentValidation;
 using ImTools;
 using Microsoft.AspNetCore.Diagnostics;
@@ -42,6 +43,18 @@ builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.Decorate<IBasketRepository, CachedBasketRepository>(); 
+
+builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(options =>
+{
+    options.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]);
+})
+ .ConfigurePrimaryHttpMessageHandler(()=>
+ {
+     var handler = new HttpClientHandler(); 
+     handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+     return handler;
+ }); 
+
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
