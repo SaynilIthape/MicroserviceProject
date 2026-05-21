@@ -27,6 +27,7 @@ using FluentValidation;
 using ImTools;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using BuildingBlocks.Messaging.MassTransit; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,8 +54,9 @@ builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
      var handler = new HttpClientHandler(); 
      handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
      return handler;
- }); 
+ });
 
+builder.Services.AddMessageBroker(builder.Configuration);
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {

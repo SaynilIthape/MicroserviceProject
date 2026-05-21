@@ -44,6 +44,16 @@ services:
     ports:
       - "6379:6379"
   
+  orderdb:
+    container_name: orderdb
+    environment:
+        - ACCEPT_EULA=Y
+        - SA_PASSWORD=Strong@12345
+    restart: always
+    ports:
+        - "1433:1433"
+
+
   # ollama:
   #   container_name: ollama
   #   ports:
